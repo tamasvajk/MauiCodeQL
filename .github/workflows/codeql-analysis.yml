@@ -13,7 +13,7 @@ defaults:
 jobs:
   analyze:
     name: Analyze
-    runs-on: windows-2022
+    runs-on: windows-latest
     permissions:
       actions: read
       contents: read
@@ -30,38 +30,42 @@ jobs:
       - name: Support long paths
         run: git config --system core.longpaths true
 
+      - name: Enable long paths in the registry
+        run: |
+          reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f
+
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install Maui
+        run: |
+          dotnet workload install maui
+
+      - name: Clean the workspace
+        run: dotnet clean MauiCodeQL.sln
+
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           queries: security-extended
           packs: codeql/csharp-queries
-          # If you wish to specify custom queries, you can do so here or in a config file.
-          # By default, queries listed here will override any specified in a config file.
-          # Prefix the list here with "+" to use these queries and those in the config file.
-
-          # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
-          # queries: security-extended,security-and-quality
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
-
-      - name: Install Maui
-        run: |
-          dotnet nuget locals all --clear
-          dotnet workload install maui ios android
-
-      - name: Restore nuget packages
-        run: nuget restore MauiCodeQL.sln
+      # If you wish to specify custom queries, you can do so here or in a config file.
+      # By default, queries listed here will override any specified in a config file.
+      # Prefix the list here with "+" to use these queries and those in the config file.
 
       - name: Build app for release
         run: |
-          cd src
           dotnet build -f net9.0-windows10.0.19041.0 -c Release
 
+      # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+      # queries: security-extended,security-and-quality
+
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
