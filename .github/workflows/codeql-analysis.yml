@@ -64,6 +64,7 @@ jobs:
         run: |
           dotnet build -f net9.0-windows10.0.19041.0 -c Release
 
+
       # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
       # queries: security-extended,security-and-quality
 
