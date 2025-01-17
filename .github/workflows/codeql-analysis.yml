@@ -62,7 +62,7 @@ jobs:
 
       - name: Build app for release
         run: |
-          dotnet build -f net9.0-windows10.0.19041.0 -c Release -v:diag -tl:off /p:EmitCompilerGeneratedFiles=true
+          dotnet build -f net9.0-windows10.0.19041.0 -c Release -bl:log.binlog
 
 
       # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
